@@ -15,6 +15,8 @@ TOKEN = getenv("TWITTER_BEARER_TOKEN")
 KAFKA_SERVER = 'localhost:9092'
 KAFKA_TOPIC = 'tweets'
 REMOVE_RETWEETS = True
+MAX_RESULTS = 100
+TWEET_LANG = 'pt'
 
 teams = [
     'fortaleza',
@@ -44,8 +46,13 @@ teams = [
 
 query = f'({" OR ".join(teams)})'
 
+if TWEET_LANG:
+    query += f" lang:{TWEET_LANG}"
+
 if REMOVE_RETWEETS:
     query += " -is:retweet"
+
+print(f"Query length: {len(query)}")
 
 headers = {
     "Content-Type": "application/json",
@@ -54,7 +61,7 @@ headers = {
 params = {
     'start_time': Timestamp.now(tz='UTC').strftime(DATE_FORMAT),
     'query': query,
-    'max_results': 50,
+    'max_results': MAX_RESULTS,
     'tweet.fields': 'created_at',
     'user.fields': 'username'
 }
