@@ -15,8 +15,9 @@ TOKEN = getenv("TWITTER_BEARER_TOKEN")
 KAFKA_SERVER = 'localhost:9092'
 KAFKA_TOPIC = 'tweets'
 REMOVE_RETWEETS = True
-MAX_RESULTS = 100
+MAX_RESULTS = 10
 TWEET_LANG = 'pt'
+SLEEP_TIME = 60
 
 teams = [
     'fortaleza',
@@ -76,7 +77,7 @@ session = requests.Session()
 while True:
 
     # Assure the rate limit of 180 requests per 15 minutes
-    sleep(5)
+    sleep(SLEEP_TIME)
 
     # Request
     with session.get(
@@ -105,4 +106,5 @@ while True:
 
         else:
             print(f"Request presented code: {response.status_code}")
+            print(response.text)
 
