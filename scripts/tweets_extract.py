@@ -1,24 +1,24 @@
 import requests
-from dotenv import load_dotenv
 from os import getenv
 from time import sleep
 from pandas import Timestamp
 from kafka import KafkaProducer
 from json import dumps
-
-load_dotenv()
+import logging
 
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 BASE_URL = "https://api.twitter.com/"
 ROUTE = "2/tweets/search/recent"
-TOKEN = getenv("TWITTER_BEARER_TOKEN")
-KAFKA_SERVER = 'localhost:9092'
-KAFKA_TOPIC = 'tweets'
-REMOVE_RETWEETS = True
-MAX_RESULTS = 10
-TWEET_LANG = 'pt'
-SLEEP_TIME = 60
 
+TOKEN = getenv("TWITTER_BEARER_TOKEN")
+KAFKA_SERVER = getenv('KAFKA_SERVER')
+KAFKA_TOPIC = getenv('KAFKA_TOPIC')
+REMOVE_RETWEETS = getenv('REMOVE_RETWEETS', 'True').lower() == 'true'
+MAX_RESULTS = int(getenv('MAX_RESULTS', '10'))
+TWEET_LANG = getenv('TWEET_LANG', 'pt')
+SLEEP_TIME = int(getenv('SLEEP_TIME', '60'))
+
+# TODO: Remove this list from the script
 teams = [
     'fortaleza',
     'ceara',
@@ -53,7 +53,7 @@ if TWEET_LANG:
 if REMOVE_RETWEETS:
     query += " -is:retweet"
 
-print(f"Query length: {len(query)}")
+logging.info(f"Query length: {len(query)}")
 
 headers = {
     "Content-Type": "application/json",
@@ -67,6 +67,7 @@ params = {
     'user.fields': 'username'
 }
 
+# TODO: Create topic if not exists
 producer = KafkaProducer(
     bootstrap_servers=[KAFKA_SERVER],
     value_serializer=lambda x: dumps(x).encode('utf-8')
@@ -76,10 +77,8 @@ session = requests.Session()
 
 while True:
 
-    # Assure the rate limit of 180 requests per 15 minutes
     sleep(SLEEP_TIME)
 
-    # Request
     with session.get(
         f"{BASE_URL}{ROUTE}",
         headers=headers,
@@ -89,15 +88,13 @@ while True:
         if response.status_code == 200:
             payload = response.json()
 
-            # If there are any new tweets
             if payload['meta']['result_count'] > 0:
                 tweets = payload['data']
-                print(f"Tweets count: {payload['meta']['result_count']}")
+                logging.info(f"Tweets sent: {payload['meta']['result_count']}")
 
                 for tweet in tweets:
                     producer.send(KAFKA_TOPIC, tweet)
 
-                # Insert since_id and pop start_time for first run
                 newest_id = payload['meta']['newest_id']
                 params.update({
                     "since_id": newest_id
@@ -105,6 +102,5 @@ while True:
                 params.pop('start_time', None)
 
         else:
-            print(f"Request presented code: {response.status_code}")
-            print(response.text)
+            logging.info(f"Request presented code: {response.status_code}")
 

@@ -9,6 +9,9 @@ TWITTER_SPECIAL_REMOVE_REGEX = r'(@\w+)|(#)|(https\S+)'
 EMOJI_REMOVE_REGEX = r'[^\x00-\xff]+'
 PUNCTUATION_REMOVE_REGEX = r'[\x21-\x2f]|[\x3a-\x40]|[\x5b-\x60]|[\x7b-\xbf]'
 
+# TODO: Make all connections and configs as environment variables
+
+# TODO: Remove this dict from the script
 TEAMS_SYNONYMS_MAPPING = {
     'fortaleza': 'fortaleza',
     'ceará': 'ceara',
@@ -38,6 +41,7 @@ TEAMS_SYNONYMS_MAPPING = {
     'são paulo': "sao_paulo"
 }
 
+# TODO: Remove this list from the script
 CONTEXTS = [
     'futebol',
     'escalação',

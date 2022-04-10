@@ -1,36 +1,75 @@
 version: "2"
 
+networks:
+  application_network:
+    driver: bridge
+    name: application_network
+
+# TODO: Include the spark service
 services:
 
   zookeeper:
     image: docker.io/bitnami/zookeeper:3.8
-    ports:
-      - "2181:2181"
-    volumes:
-      - "zookeeper_data:/bitnami"
+    container_name: zookeeper
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
+    networks:
+      - application_network
 
   kafka:
     image: docker.io/bitnami/kafka:3.1
-    ports:
-      - "9092:9092"
-    expose:
-      - "9093"
-    volumes:
-      - "kafka_data:/bitnami"
+    container_name: kafka
     environment:
-      - KAFKA_ADVERTISED_LISTENERS=INSIDE://kafka:9093,OUTSIDE://localhost:9092
-      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
-      - KAFKA_LISTENERS=INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092
-      - KAFKA_INTER_BROKER_LISTENER_NAME=INSIDE
       - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
       - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_DELETE_TOPIC_ENABLE=true
     depends_on:
       - zookeeper
+    networks:
+      - application_network
 
-volumes:
-  zookeeper_data:
-    driver: local
-  kafka_data:
-    driver: local
+  tweets_extract:
+    build:
+      dockerfile: docker/Dockerfile
+      context: .
+    container_name: tweets_extract
+    environment:
+      - KAFKA_SERVER=kafka:9092
+      - KAFKA_TOPIC=tweets-raw
+    env_file:
+      - .env
+    command: python scripts/tweets_extract.py
+    depends_on:
+      - kafka
+      - mongo
+    networks:
+      - application_network
+    restart: 'always'
+
+  tweets_load:
+    build:
+      dockerfile: docker/Dockerfile
+      context: .
+    container_name: tweets_load
+    environment:
+      - KAFKA_SERVER=kafka:9092
+      - KAFKA_TOPIC=tweets-final
+      - MONGO_SERVER=mongo:27017
+      - MONGO_DATABASE=tweets
+      - MONGO_COLLECTION=tweets
+    command: python scripts/tweets_load.py
+    depends_on:
+      - kafka
+      - mongo
+    networks:
+      - application_network
+    restart: 'always'
+
+  mongo:
+    image: mongo:5.0.6
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    networks:
+      - application_network
+    
