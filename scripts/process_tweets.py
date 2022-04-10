@@ -1,18 +1,17 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, from_json, regexp_replace, lower, expr, split, filter, explode, size, udf, create_map, lit
-from pyspark.sql.types import StructType, StructField, StringType, TimestampType, DecimalType
+from pyspark.sql.types import StructType, StructField, StringType, TimestampType, DecimalType, IntegerType, MapType
 from itertools import chain
+from collections import Counter
 
-
-# TODO: Regex tá cortando: ú, ó, ô
 TWITTER_LINEBREAK_SPACE_REGEX = r'\\n|\s'
 TWITTER_SPECIAL_REMOVE_REGEX = r'(@\w+)|(#)|(https\S+)'
-EMOJI_REMOVE_REGEX = r'[^\x00-\xefbfbf]+'
+EMOJI_REMOVE_REGEX = r'[^\x00-\xff]+'
 PUNCTUATION_REMOVE_REGEX = r'[\x21-\x2f]|[\x3a-\x40]|[\x5b-\x60]|[\x7b-\xbf]'
 
 TEAMS_SYNONYMS_MAPPING = {
     'fortaleza': 'fortaleza',
-    'ceara': 'ceara',
+    'ceará': 'ceara',
     'américa mg': "america_mg",
     'américamg': "america_mg",
     'américa mineiro': "america_mg",
@@ -164,18 +163,20 @@ df = df.withColumn('contexts', expr(f"array_distinct(regexp_extract_all(text, '{
 df = df.where(size(col('teams')) > 0)
 df = df.where(size(col('contexts')) > 0)
 
-# TODO: Fazer a contagem de palavras
-# Separar as palavars em chave: count
+# Contagem das palavras
 df = df.withColumn("words", split(col('text'), TWITTER_LINEBREAK_SPACE_REGEX, -1))
 df = df.withColumn("words", filter(col('words'), lambda x: x != ''))
+
+udf_counter = udf(
+    lambda x: dict(Counter(x)),
+    MapType(StringType(), IntegerType())
+)
+df = df.withColumn("words_count", udf_counter(col("words")))
 
 # Explode and map teams
 mapping_expr = create_map([lit(x) for x in chain(*TEAMS_SYNONYMS_MAPPING.items())])
 df = df.withColumn("team", explode(col("teams")))
 df = df.withColumn("team", mapping_expr[col("team")])
-
-# TODO: Drop duplicates (some teams have more than one synonym)
-df = df.select('created_at', 'id', 'words', 'contexts', 'team')
 
 # Escrevendo a stream em um tópico Kafka
 # Similar ao readStream/read, existem os atributos writeStream/write, 
@@ -183,6 +184,7 @@ df = df.select('created_at', 'id', 'words', 'contexts', 'team')
 # Para escrever no Kafka, é preciso determinar um checkpointLocation
 # Estou utilizando o selectExpr para encapsular o df em um json "value", 
 #   para enviar os dados ao Kafka novamente
+df = df.select('created_at', 'id', 'words_count', 'contexts', 'team')
 query = df \
     .selectExpr("to_json(struct(*)) AS value") \
     .writeStream \
@@ -191,8 +193,4 @@ query = df \
     .option("topic", "tweets_treated") \
     .option("checkpointLocation", "checkpoint/directory") \
     .start()
-
 query.awaitTermination()
-
-
-
