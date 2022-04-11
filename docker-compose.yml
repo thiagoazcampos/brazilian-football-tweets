@@ -1,10 +1,5 @@
 version: "2"
 
-networks:
-  application_network:
-    driver: bridge
-    name: application_network
-
 services:
 
   zookeeper:
@@ -12,8 +7,6 @@ services:
     container_name: zookeeper
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
-    networks:
-      - application_network
 
   kafka:
     image: docker.io/bitnami/kafka:3.1
@@ -24,8 +17,6 @@ services:
       - KAFKA_CFG_DELETE_TOPIC_ENABLE=true
     depends_on:
       - zookeeper
-    networks:
-      - application_network
 
   tweets_extract:
     build:
@@ -41,8 +32,6 @@ services:
     depends_on:
       - kafka
       - mongo
-    networks:
-      - application_network
     restart: 'always'
 
   spark:
@@ -55,8 +44,6 @@ services:
       - KAFKA_FINAL_TOPIC=tweets-final
     depends_on:
       - kafka
-    networks:
-      - application_network
     restart: 'always'
     user: root
     volumes:
@@ -78,8 +65,6 @@ services:
     depends_on:
       - kafka
       - mongo
-    networks:
-      - application_network
     restart: 'always'
 
   mongo:
@@ -87,6 +72,3 @@ services:
     container_name: mongo
     ports:
       - "27017:27017"
-    networks:
-      - application_network
-    
