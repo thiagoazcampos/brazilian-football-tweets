@@ -10,7 +10,6 @@ MONGO_SERVER = getenv("MONGO_SERVER")
 MONGO_DATABASE = getenv("MONGO_DATABASE")
 MONGO_COLLECTION = getenv("MONGO_COLLECTION")
 
-# TODO: Create topic if not exists
 consumer = KafkaConsumer(
     KAFKA_TOPIC,
     bootstrap_servers=[KAFKA_SERVER],

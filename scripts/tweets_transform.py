@@ -3,121 +3,20 @@ from pyspark.sql.functions import col, from_json, regexp_replace, lower, expr, s
 from pyspark.sql.types import StructType, StructField, StringType, TimestampType, DecimalType, IntegerType, MapType
 from itertools import chain
 from collections import Counter
+from os import getenv
+from utils.spark import teams_synonyms_mapping, contexts
 
 TWITTER_LINEBREAK_SPACE_REGEX = r'\\n|\s'
 TWITTER_SPECIAL_REMOVE_REGEX = r'(@\w+)|(#)|(https\S+)'
 EMOJI_REMOVE_REGEX = r'[^\x00-\xff]+'
 PUNCTUATION_REMOVE_REGEX = r'[\x21-\x2f]|[\x3a-\x40]|[\x5b-\x60]|[\x7b-\xbf]'
 
-# TODO: Make all connections and configs as environment variables
+KAFKA_SERVER = getenv('KAFKA_SERVER')
+KAFKA_RAW_TOPIC = getenv('KAFKA_RAW_TOPIC')
+KAFKA_FINAL_TOPIC = getenv('KAFKA_FINAL_TOPIC')
 
-# TODO: Remove this dict from the script
-TEAMS_SYNONYMS_MAPPING = {
-    'fortaleza': 'fortaleza',
-    'ceará': 'ceara',
-    'américa mg': "america_mg",
-    'américamg': "america_mg",
-    'américa mineiro': "america_mg",
-    'athletico': "athletico",
-    'atlético go': "atletico_go",
-    'atléticogo': "atletico_go",
-    'atlético goianiense': "atletico_go",
-    'atlético mg': "atletico_mg",
-    'atléticomg': "atletico_mg",
-    'atlético mineiro': "atletico_mg",
-    'avai': "avai",
-    'botafogo': "botafogo",
-    'bragantino': "bragantino",
-    'corinthians': "corinthians",
-    'coritiba': "coritiba",
-    'cuiaba': "cuiaba",
-    'flamengo': "flamengo",
-    'fluminense': "fluminense",
-    'goias': "goias",
-    'internacional': "internacional",
-    'juventude': "juventude",
-    'palmeiras': "palmeiras",
-    'santos': "santos",
-    'são paulo': "sao_paulo"
-}
-
-# TODO: Remove this list from the script
-CONTEXTS = [
-    'futebol',
-    'escalação',
-    'placar',
-    'partida',
-    'confronto',
-    'enfrenta',
-    'jogador',
-    'jogo',
-    'jogar',
-    'time',
-    'equipe',
-    'seleção',
-    'contrato',
-    'contratação',
-    'plantel',
-    'ganhar',
-    'ganhou',
-    'vence',
-    'venceu',
-    'ganha',
-    'ganhou',
-    'bola',
-    'chuteira',
-    'estádio',
-    'ingresso',
-    'gramado',
-    'trave',
-    'travessão',
-    'chute',
-    'defesa',
-    'ataque',
-    'atacante',
-    'zagueiro',
-    'zaga',
-    'lateral',
-    'falta',
-    'expulsão',
-    'cartão',
-    'perde',
-    'perdeu',
-    'rebaixamento',
-    'vitória',
-    'derrota',
-    'brasileirão',
-    'campeonato',
-    'copa',
-    'lance',
-    'gol',
-    'rodada',
-    'enfrenta',
-    'campeão',
-    'rival',
-    'rivais',
-    'título',
-    'campeões',
-    'uniforme',
-    'camisa',
-    'libertadores',
-    'transmissão',
-    'assistir',
-    'patrocinador',
-    'patrocínio',
-    'torcida',
-    'torcedor',
-    'arquibancada',
-    'esporte',
-    'juiz',
-    'var',
-    'arbitragem',
-    'série a'
-]
-
-teamsRegex = "|".join(list(TEAMS_SYNONYMS_MAPPING.keys()))
-contextRegex = "|".join(CONTEXTS)
-
+teamsRegex = "|".join(list(teams_synonyms_mapping.keys()))
+contextRegex = "|".join(contexts)
 
 spark = SparkSession \
     .builder \
@@ -138,8 +37,8 @@ schema = StructType([
 lines = spark \
     .readStream \
     .format("kafka") \
-    .option("kafka.bootstrap.servers", "localhost:9092") \
-    .option("subscribe", "tweets") \
+    .option("kafka.bootstrap.servers", KAFKA_SERVER) \
+    .option("subscribe", KAFKA_RAW_TOPIC) \
     .load()
 
 # Possível também utilizar o select + cast
@@ -178,7 +77,7 @@ udf_counter = udf(
 df = df.withColumn("words_count", udf_counter(col("words")))
 
 # Explode and map teams
-mapping_expr = create_map([lit(x) for x in chain(*TEAMS_SYNONYMS_MAPPING.items())])
+mapping_expr = create_map([lit(x) for x in chain(*teams_synonyms_mapping.items())])
 df = df.withColumn("team", explode(col("teams")))
 df = df.withColumn("team", mapping_expr[col("team")])
 
@@ -193,8 +92,8 @@ query = df \
     .selectExpr("to_json(struct(*)) AS value") \
     .writeStream \
     .format("kafka") \
-    .option("kafka.bootstrap.servers", "localhost:9092") \
-    .option("topic", "tweets_treated") \
+    .option("kafka.bootstrap.servers", KAFKA_SERVER) \
+    .option("topic", KAFKA_FINAL_TOPIC) \
     .option("checkpointLocation", "checkpoint/directory") \
     .start()
 query.awaitTermination()

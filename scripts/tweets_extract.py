@@ -5,6 +5,7 @@ from pandas import Timestamp
 from kafka import KafkaProducer
 from json import dumps
 import logging
+from utils.twitter import teams
 
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 BASE_URL = "https://api.twitter.com/"
@@ -17,33 +18,6 @@ REMOVE_RETWEETS = getenv('REMOVE_RETWEETS', 'True').lower() == 'true'
 MAX_RESULTS = int(getenv('MAX_RESULTS', '10'))
 TWEET_LANG = getenv('TWEET_LANG', 'pt')
 SLEEP_TIME = int(getenv('SLEEP_TIME', '60'))
-
-# TODO: Remove this list from the script
-teams = [
-    'fortaleza',
-    'ceara',
-    '"america mg"',
-    '"america mineiro"',
-    'athletico',
-    '"atletico go"',
-    '"atletico goianiense"',
-    '"atletico mg"',
-    '"atletico mineiro"',
-    'avai',
-    'botafogo',
-    'bragantino',
-    'corinthians',
-    'coritiba',
-    'cuiaba',
-    'flamengo',
-    'fluminense',
-    'goias',
-    'internacional',
-    'juventude',
-    'palmeiras',
-    'santos',
-    '"sao paulo"'
-]
 
 query = f'({" OR ".join(teams)})'
 
@@ -67,7 +41,6 @@ params = {
     'user.fields': 'username'
 }
 
-# TODO: Create topic if not exists
 producer = KafkaProducer(
     bootstrap_servers=[KAFKA_SERVER],
     value_serializer=lambda x: dumps(x).encode('utf-8')

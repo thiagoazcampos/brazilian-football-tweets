@@ -5,7 +5,6 @@ networks:
     driver: bridge
     name: application_network
 
-# TODO: Include the spark service
 services:
 
   zookeeper:
@@ -45,6 +44,24 @@ services:
     networks:
       - application_network
     restart: 'always'
+
+  spark:
+    image: bitnami/spark:3.1.2
+    container_name: spark
+    environment:
+      - SPARK_MODE=master
+      - KAFKA_SERVER=kafka:9092
+      - KAFKA_RAW_TOPIC=tweets-raw
+      - KAFKA_FINAL_TOPIC=tweets-final
+    depends_on:
+      - kafka
+    networks:
+      - application_network
+    restart: 'always'
+    user: root
+    volumes:
+      - ./scripts:/scripts
+    command: sh /scripts/spark_submit_tweets_transform.sh
 
   tweets_load:
     build:
