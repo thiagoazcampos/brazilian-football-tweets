@@ -7,10 +7,7 @@ from json import dumps
 import logging
 from utils.twitter import teams
 
-DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
-BASE_URL = "https://api.twitter.com/"
-ROUTE = "2/tweets/search/recent"
-
+# Environment variables
 TOKEN = getenv("TWITTER_BEARER_TOKEN")
 KAFKA_SERVER = getenv('KAFKA_SERVER')
 KAFKA_TOPIC = getenv('KAFKA_TOPIC')
@@ -19,14 +16,16 @@ MAX_RESULTS = int(getenv('MAX_RESULTS', '10'))
 TWEET_LANG = getenv('TWEET_LANG', 'pt')
 SLEEP_TIME = int(getenv('SLEEP_TIME', '60'))
 
-query = f'({" OR ".join(teams)})'
+DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
+BASE_URL = "https://api.twitter.com/"
+ROUTE = "2/tweets/search/recent"
 
+# Building tweets query
+query = f'({" OR ".join(teams)})'
 if TWEET_LANG:
     query += f" lang:{TWEET_LANG}"
-
 if REMOVE_RETWEETS:
     query += " -is:retweet"
-
 logging.info(f"Query length: {len(query)}")
 
 headers = {
