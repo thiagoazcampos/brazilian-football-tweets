@@ -14,7 +14,6 @@ services:
     environment:
       - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
       - ALLOW_PLAINTEXT_LISTENER=yes
-      - KAFKA_CFG_DELETE_TOPIC_ENABLE=true
     depends_on:
       - zookeeper
 
@@ -26,6 +25,10 @@ services:
     environment:
       - KAFKA_SERVER=kafka:9092
       - KAFKA_TOPIC=tweets-raw
+      - REMOVE_RETWEETS=True
+      - MAX_RESULTS=10
+      - TWEET_LANG=pt
+      - SLEEP_TIME=60
     env_file:
       - .env
     command: python scripts/tweets_extract.py

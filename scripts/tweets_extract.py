@@ -12,9 +12,9 @@ TOKEN = getenv("TWITTER_BEARER_TOKEN")
 KAFKA_SERVER = getenv('KAFKA_SERVER')
 KAFKA_TOPIC = getenv('KAFKA_TOPIC')
 REMOVE_RETWEETS = getenv('REMOVE_RETWEETS', 'True').lower() == 'true'
-MAX_RESULTS = int(getenv('MAX_RESULTS', '10'))
+MAX_RESULTS = int(getenv('MAX_RESULTS', '100'))
 TWEET_LANG = getenv('TWEET_LANG', 'pt')
-SLEEP_TIME = int(getenv('SLEEP_TIME', '60'))
+SLEEP_TIME = int(getenv('SLEEP_TIME', '5'))
 
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 BASE_URL = "https://api.twitter.com/"
