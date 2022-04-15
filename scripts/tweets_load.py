@@ -4,6 +4,12 @@ from pymongo import MongoClient
 import logging
 from os import getenv
 
+logging.basicConfig(
+    level="INFO",
+    format="%(asctime)s :: %(levelname)s :: %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+
 KAFKA_TOPIC = getenv('KAFKA_TOPIC')
 KAFKA_SERVER = getenv("KAFKA_SERVER")
 MONGO_SERVER = getenv("MONGO_SERVER")

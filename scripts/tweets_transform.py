@@ -82,7 +82,8 @@ mapping_expr = create_map([lit(x) for x in chain(*teams_synonyms_mapping.items()
 df = df.withColumn("team", mapping_expr[col("team")])
 
 # Returning it to kafka
-df = df.select('created_at', 'id', 'words_count', 'contexts', 'team')
+df = df.withColumnRenamed('id', 'tweet_id')
+df = df.select('created_at', 'tweet_id', 'words_count', 'contexts', 'team')
 query = df \
     .selectExpr("to_json(struct(*)) AS value") \
     .writeStream \

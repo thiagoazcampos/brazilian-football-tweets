@@ -1,11 +1,17 @@
 import requests
 from os import getenv
 from time import sleep
-from pandas import Timestamp
+from pandas import Timestamp, Timedelta
 from kafka import KafkaProducer
 from json import dumps
 import logging
 from utils.twitter import teams
+
+logging.basicConfig(
+    level="INFO",
+    format="%(asctime)s :: %(levelname)s :: %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 
 # Environment variables
 TOKEN = getenv("TWITTER_BEARER_TOKEN")
@@ -33,11 +39,10 @@ headers = {
     "Authorization": f"Bearer {TOKEN}"
 }
 params = {
-    'start_time': Timestamp.now(tz='UTC').strftime(DATE_FORMAT),
+    'start_time': (Timestamp.now(tz='UTC')-Timedelta(seconds=10)).strftime(DATE_FORMAT),
     'query': query,
     'max_results': MAX_RESULTS,
-    'tweet.fields': 'created_at',
-    'user.fields': 'username'
+    'tweet.fields': 'created_at'
 }
 
 producer = KafkaProducer(
