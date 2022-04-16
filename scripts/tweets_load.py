@@ -23,8 +23,7 @@ consumer = KafkaConsumer(
 )
 
 mongo_client = MongoClient(host=[MONGO_SERVER])
-mongo_db = mongo_client.get_database(MONGO_DATABASE)
-mongo_collection = mongo_db.get_collection(MONGO_COLLECTION)
+mongo_collection = mongo_client[MONGO_DATABASE][MONGO_COLLECTION]
 
 for message in consumer:
     mongo_collection.insert_one(message.value)
