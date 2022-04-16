@@ -57,8 +57,9 @@ df = df.withColumn('text', regexp_replace(col('text'), EMOJI_REMOVE_REGEX, ''))
 df = df.withColumn('text', regexp_replace(col('text'), PUNCTUATION_REMOVE_REGEX, ''))
 df = df.withColumn('text', lower(col('text')))
 
-# Identifying the teams mentioned
+# Identifying the teams mentioned and removing from text
 df = df.withColumn('teams', expr(f"array_distinct(regexp_extract_all(text, '{teamsRegex}', 0))"))
+df = df.withColumn('text', regexp_replace(col('text'), teamsRegex, ''))
 
 # Identifying the contexts mentioned
 df = df.withColumn('contexts', expr(f"array_distinct(regexp_extract_all(text, '{contextRegex}', 0))"))
