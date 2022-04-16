@@ -5,7 +5,7 @@ from pandas import Timestamp, Timedelta
 from kafka import KafkaProducer
 from json import dumps
 import logging
-from utils.twitter import teams
+from config.twitter import teams
 
 logging.basicConfig(
     level="INFO",

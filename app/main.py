@@ -3,7 +3,7 @@ from pymongo import MongoClient
 from os import getenv
 import requests
 from datetime import datetime, timedelta
-from utils.teams import teams_pretty_mapping, teams_tag_mapping
+from config.teams import teams_pretty_mapping, teams_tag_mapping
 from pandas import DataFrame
 
 # TODO: Put streamlit inside the docker-compose

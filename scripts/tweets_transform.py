@@ -11,7 +11,7 @@ from pyspark.sql.types import (
 from itertools import chain
 from collections import Counter
 from os import getenv
-from utils.spark import teams_synonyms_mapping, contexts
+from config.spark import teams_synonyms_mapping, contexts
 
 # Environment variables
 KAFKA_SERVER = getenv('KAFKA_SERVER')
