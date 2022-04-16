@@ -71,10 +71,15 @@ with col_tweets:
 with col_statistics:
     st.header("Statistics")
 
-    # TODO: Barplot: most used words
+    # TODO: Order barplots by count
+
     st.subheader("Most used words")
-    
-    
+    words_pipeline = [{"$match": mongo_query}, {"$unwind": "$words_count"}, {"$group" : {"_id": "$words_count.word", "count": {"$sum": {"$toInt": "$words_count.count"}}}}, {"$sort": {"count": -1}}, {"$limit": 50}]
+    result = mongo_collection.aggregate(words_pipeline)
+    df = DataFrame(result)
+    df.set_index('_id', inplace=True)
+    st.bar_chart(df)
+
     st.subheader("Most used contexts")
     contexts_pipeline = [{"$match": mongo_query}, {"$unwind": "$contexts"}, {"$group": {"_id": "$contexts", "Tweets": {"$sum": 1}}}, {"$sort": {"Tweets": -1}}]
     result = mongo_collection.aggregate(contexts_pipeline)

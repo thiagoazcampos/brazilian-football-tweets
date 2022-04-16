@@ -5,8 +5,8 @@ from pyspark.sql.functions import (
     udf, create_map, lit
 )
 from pyspark.sql.types import (
-    StructType, StructField, StringType,
-    TimestampType, DecimalType, IntegerType, MapType
+    StructType, StructField, StringType, ArrayType,
+    TimestampType, DecimalType, MapType
 )
 from itertools import chain
 from collections import Counter
@@ -72,8 +72,8 @@ df = df.where(size(col('contexts')) > 0)
 df = df.withColumn("words", split(col('text'), TWITTER_LINEBREAK_SPACE_REGEX, -1))
 df = df.withColumn("words", filter(col('words'), lambda x: x != ''))
 udf_counter = udf(
-    lambda x: dict(Counter(x)),
-    MapType(StringType(), IntegerType())
+    lambda x: [{"word": word, "count": count} for word, count in Counter(x).items()],
+    ArrayType(MapType(StringType(), StringType()))
 )
 df = df.withColumn("words_count", udf_counter(col("words")))
 
