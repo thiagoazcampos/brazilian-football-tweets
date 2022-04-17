@@ -1,0 +1,104 @@
+[
+    {
+        "name": "América-MG",
+        "tag": "america_mg",
+        "synonyms": ["\"américa mg\"", "américamg", "\"américa mineiro\""]
+    },
+    {
+        "name": "Athletico-PR",
+        "tag": "athletico",
+        "synonyms": ["athletico"]
+    },
+    {
+        "name": "Atlético-GO",
+        "tag": "atletico_go",
+        "synonyms": ["\"atlético go\"", "atléticogo", "\"atlético goianiense\""]
+    },
+    {
+        "name": "Atlético-MG",
+        "tag": "atletico_mg",
+        "synonyms": ["\"atlético mg\"", "atléticomg", "\"atlético mineiro\""]
+    },
+    {
+        "name": "Avai",
+        "tag": "avai",
+        "synonyms": ["avai"]
+    },
+    {
+        "name": "Botafogo",
+        "tag": "botafogo",
+        "synonyms": ["botafogo"]
+    },
+    {
+        "name": "Bragantino",
+        "tag": "bragantino",
+        "synonyms": ["bragantino"]
+    },
+    {
+        "name": "Ceará",
+        "tag": "ceara",
+        "synonyms": ["ceará"]
+    },
+    {
+        "name": "Corinthians",
+        "tag": "corinthians",
+        "synonyms": ["corinthians"]
+    },
+    {
+        "name": "Coritiba",
+        "tag": "coritiba",
+        "synonyms": ["coritiba"]
+    },
+    {
+        "name": "Cuiaba",
+        "tag": "cuiaba",
+        "synonyms": ["cuiaba"]
+    },
+    {
+        "name": "Flamengo",
+        "tag": "flamengo",
+        "synonyms": ["flamengo"]
+    },
+    {
+        "name": "Fluminense",
+        "tag": "fluminense",
+        "synonyms": ["fluminense"]
+    },
+    {
+        "name": "Fortaleza",
+        "tag": "fortaleza",
+        "synonyms": ["fortaleza"]
+    },
+    {
+        "name": "Goiás",
+        "tag": "goias",
+        "synonyms": ["goiás"]
+    },
+    {
+        "name": "Internacional",
+        "tag": "internacional",
+        "synonyms": ["internacional"]
+    },
+    {
+        "name": "Juventude",
+        "tag":"juventude",
+        "synonyms": ["juventude"]
+    },
+    {
+        "name": "Palmeiras",
+        "tag": "palmeiras",
+        "synonyms": ["palmeiras"]
+    },
+    {
+        "name": "Santos",
+        "tag": "santos",
+        "synonyms": ["santos"]
+    },
+    {
+        "name": "São Paulo",
+        "tag": "sao_paulo",
+        "synonyms": ["\"são paulo\""]
+    }
+]
+
+

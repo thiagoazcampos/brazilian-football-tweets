@@ -3,9 +3,9 @@ from os import getenv
 from time import sleep
 from pandas import Timestamp, Timedelta
 from kafka import KafkaProducer
-from json import dumps
+from json import dumps, load
 import logging
-from config.twitter import teams
+from os.path import dirname, join
 
 logging.basicConfig(
     level="INFO",
@@ -26,8 +26,11 @@ DATE_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 BASE_URL = "https://api.twitter.com/"
 ROUTE = "2/tweets/search/recent"
 
+teams_json = load(open(join(dirname(__file__), "../input/teams.json")))
+teams_synonyms = [element for team in teams_json for element in team['synonyms']]
+
 # Building tweets query
-query = f'({" OR ".join(teams)})'
+query = f'({" OR ".join(teams_synonyms)})'
 if TWEET_LANG:
     query += f" lang:{TWEET_LANG}"
 if REMOVE_RETWEETS:

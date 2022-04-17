@@ -51,6 +51,7 @@ services:
     user: root
     volumes:
       - ./scripts:/scripts
+      - ./input:/input
     command: sh /scripts/spark_submit_tweets_transform.sh
 
   tweets_load:

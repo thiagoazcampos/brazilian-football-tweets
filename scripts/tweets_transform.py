@@ -11,12 +11,19 @@ from pyspark.sql.types import (
 from itertools import chain
 from collections import Counter
 from os import getenv
-from config.spark import teams_synonyms_mapping, contexts
+from os.path import join, dirname
+from json import load
 
 # Environment variables
 KAFKA_SERVER = getenv('KAFKA_SERVER')
 KAFKA_RAW_TOPIC = getenv('KAFKA_RAW_TOPIC')
 KAFKA_FINAL_TOPIC = getenv('KAFKA_FINAL_TOPIC')
+
+teams_json = load(open(join(dirname(__file__), "../input/teams.json"), encoding='utf-8'))
+contexts = load(open(join(dirname(__file__), "../input/contexts.json"), encoding='utf-8'))
+teams_synonyms_mapping = dict(
+    [(synonym.replace("\"", ""), team['tag']) for team in teams_json for synonym in team['synonyms']]
+)
 
 # Regex expressions
 TWITTER_LINEBREAK_SPACE_REGEX = r'\\n|\s'

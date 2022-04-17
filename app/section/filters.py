@@ -1,8 +1,7 @@
-from config.teams import teams_pretty_mapping, teams_tag_mapping
 import streamlit as st
 from datetime import datetime, timedelta
 
-def filters():
+def filters(teams_pretty_mapping):
     tweets_limit = st.slider("Show most recent tweets", min_value=0, max_value=20, value=5)
     start_date = st.date_input("Start Date", value=datetime.today())
     end_date = st.date_input("End Date", value=datetime.today()+timedelta(days=1))
