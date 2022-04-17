@@ -26,9 +26,9 @@ services:
       - KAFKA_SERVER=kafka:9092
       - KAFKA_TOPIC=tweets-raw
       - REMOVE_RETWEETS=True
-      - MAX_RESULTS=10
+      - MAX_RESULTS=50
       - TWEET_LANG=pt
-      - SLEEP_TIME=60
+      - SLEEP_TIME=10
     env_file:
       - .env
     command: python scripts/tweets_extract.py
